@@ -179,4 +179,4 @@ El sistema:
 2. Busca chunks similares en Chroma
 3. Construye un prompt con ese contexto
 4. Envía el prompt a Ollama
-5. Devuelve la respuesta generada
+5. Devuelve la respuesta generada# AskMyDocs
