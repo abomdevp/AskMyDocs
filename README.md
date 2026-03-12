@@ -1,54 +1,32 @@
-# RAG PDF API
+# AskMyDocs
 
-Sistema RAG local para hacer preguntas sobre documentos PDF usando Python, FastAPI, Chroma, Sentence Transformers y Ollama.
+Sistema **RAG (Retrieval Augmented Generation)** para consultar documentos PDF utilizando **FastAPI, ChromaDB y Ollama**.
 
-## Características
+El sistema permite cargar documentos PDF, indexarlos mediante embeddings y realizar preguntas sobre su contenido utilizando un **modelo de lenguaje ejecutado localmente**.
 
-- Carga de PDFs desde carpeta local
-- Extracción de texto con `pypdf`
-- Chunking con LangChain
+# Características
+
+- Consulta inteligente de documentos PDF
+- Pipeline RAG completo
 - Embeddings locales con `sentence-transformers`
-- Base vectorial local con Chroma
-- Generación de respuestas con Ollama
-- API REST con FastAPI
-- Ingesta idempotente para evitar duplicados
+- Base vectorial con **ChromaDB**
+- Generación de respuestas con **Ollama**
+- API REST construida con **FastAPI**
+- Ingesta idempotente (evita duplicados)
+- Citas de fuente en las respuestas
+- Dockerización del proyecto
 
-## Stack
+# Arquitectura
 
-- Python 3.11
-- FastAPI
-- Uvicorn
-- LangChain Text Splitters
-- ChromaDB
-- sentence-transformers
-- Ollama
-- pypdf
+Pipeline del sistema:
+PDF --> Texto --> Chunks --> Embeddings --> Chroma --> Retrieval --> Ollama --> Respuesta
 
-## Estructura del proyecto
-
-```text
-rag-pdf-api/
-├── app/
-│   ├── api/
-│   ├── core/
-│   ├── schemas/
-│   ├── services/
-│   └── main.py
-├── data/
-│   ├── chroma/
-│   └── pdfs/
-├── tests/
-├── README.md
-└── requirements.txt
-
-## Arquitectura
-
-PDF → Texto → Chunks → Embeddings → Chroma → Retrieval → Ollama → Respuesta
+# Flujo del sistema:
 
 1. Los PDFs se cargan desde una carpeta local.
-2. Se extrae el texto del documento.
+2. Se extrae el texto usando `pypdf`.
 3. El texto se divide en **chunks**.
-4. Cada chunk se convierte en **embeddings**.
+4. Cada chunk se convierte en **embeddings vectoriales**.
 5. Los embeddings se almacenan en **ChromaDB**.
 6. Cuando el usuario hace una pregunta:
    - se convierte en embedding
@@ -56,52 +34,49 @@ PDF → Texto → Chunks → Embeddings → Chroma → Retrieval → Ollama → 
    - se construye un prompt con ese contexto
    - Ollama genera la respuesta.
 
----
+# Stack Tecnológico
 
-## Stack Tecnológico
+- Python 3.11
+- FastAPI
+- Uvicorn
+- ChromaDB
+- Sentence Transformers
+- LangChain Text Splitters
+- pypdf
+- Ollama
+- Docker
 
-- **Python 3.11**
-- **FastAPI** (API REST)
-- **Uvicorn** (ASGI server)
-- **ChromaDB** (Vector Database)
-- **Sentence Transformers** (Embeddings)
-- **LangChain Text Splitters** (Chunking)
-- **pypdf** (Extracción de texto de PDFs)
-- **Ollama** (LLM local)
+# Instalación
 
----
-
-## Instalación
-
-Clonar el repositorio y crear el entorno virtual.
+Clonar el repositorio y crear un entorno virtual.
 
 ```bash
 python -m venv .venv
 source .venv/Scripts/activate
 pip install -r requirements.txt
+```
 
-## Ejecutar la API
+# Ejecutar la API
 
+```bash
 python -m uvicorn app.main:app --reload
+```
 
-La API quedará disponible en:
+La API estará disponible en:
 
 http://127.0.0.1:8000
 
-Documentación interactiva:
+Documentación interactiva (Swagger):
 
 http://127.0.0.1:8000/docs
 
-## Endpoints
-
-# POST /ingest
+# Endpoint - POST /ingest
 
 Procesa los PDFs ubicados en:
 
 data/pdfs
 
 Este endpoint:
-
 1. Carga los PDFs
 2. Extrae el texto
 3. Divide el texto en chunks
@@ -109,7 +84,6 @@ Este endpoint:
 5. Guarda los vectores en ChromaDB
 
 Ejemplo de respuesta:
-
 {
   "documents_loaded": 1,
   "chunks_created": 64,
@@ -118,7 +92,7 @@ Ejemplo de respuesta:
   "message": "Ingesta completada correctamente"
 }
 
-# POST /ask
+# Endpoint - POST /ask
 
 Permite hacer preguntas sobre los documentos indexados.
 
@@ -129,23 +103,9 @@ Ejemplo de request:
   "n_results": 3
 }
 
-Ejemplo de respuesta:
-
-{
-  "question": "¿De qué trata el documento?",
-  "answer": "El documento describe el patrón general del sueño en la infancia...",
-  "context_chunks": [
-    "chunk 1...",
-    "chunk 2...",
-    "chunk 3..."
-  ]
-}
-
-# POST /reset
+# Endpoint - POST /reset
 
 Reinicia la colección de ChromaDB.
-
-Este endpoint es útil para desarrollo y pruebas cuando se quiere volver a ingerir los documentos desde cero.
 
 Ejemplo de respuesta:
 
@@ -153,21 +113,7 @@ Ejemplo de respuesta:
   "message": "Colección reiniciada correctamente"
 }
 
-## Flujo de uso
-
-1️⃣ Colocar uno o más PDFs en:
-
-data/pdfs
-
-2️⃣ Ejecutar el endpoint:
-
-POST /ingest
-
-3️⃣ Realizar preguntas usando:
-
-POST /ask
-
-## Ejemplo de uso
+# Ejemplo de uso
 
 Pregunta:
 
@@ -175,8 +121,22 @@ Pregunta:
 
 El sistema:
 
-1. Convierte la pregunta en embedding
-2. Busca chunks similares en Chroma
-3. Construye un prompt con ese contexto
-4. Envía el prompt a Ollama
-5. Devuelve la respuesta generada# AskMyDocs
+Convierte la pregunta en embedding
+
+Busca chunks similares en Chroma
+
+Construye un prompt con ese contexto
+
+Envía el prompt a Ollama
+
+Devuelve la respuesta generada
+
+# Ejecutar con Docker
+
+Asegúrate de tener Docker Desktop y Ollama ejecutándose localmente.
+
+Construir y levantar la API:
+
+```bash
+docker compose up --build
+```
